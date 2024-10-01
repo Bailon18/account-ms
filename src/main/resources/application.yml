@@ -38,7 +38,8 @@ springdoc:
 eureka:
   client:
     service-url:
-      defaultZone: https://euraka-server-production.up.railway.app/eureka  # URL del servidor Eureka para registrar este microservicio
+      defaultZone: https://euraka-server-production.up.railway.app/eureka/  # URL del servidor Eureka para registrar este microservicio
 
   instance:
     prefer-ip-address: true  # Prefiere mostrar la IP en lugar del hostname para identificar el servicio
+    hostname: account-ms-production.up.railway.app

@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/accounts")
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class AccountController {
 
     private final AccountService accountService;
