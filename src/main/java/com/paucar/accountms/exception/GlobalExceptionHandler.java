@@ -2,6 +2,8 @@ package com.paucar.accountms.exception;
 
 import com.paucar.accountms.util.ApiResponse;
 import feign.FeignException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +14,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -75,6 +78,24 @@ public class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleConstraintViolationException(ConstraintViolationException ex) {
+        // Extrae los mensajes de las violaciones de restricciones y las convierte en un Map
+        Map<String, String> errors = ex.getConstraintViolations().stream()
+                .collect(Collectors.toMap(
+                        violation -> violation.getPropertyPath().toString(),  // Nombre del campo que falló
+                        ConstraintViolation::getMessage // Mensaje de error de la validación
+                ));
+
+        // Crea el objeto de respuesta con el formato esperado
+        ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message("Se encontraron errores de validación.")
+                .data(errors)
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(FeignException.class)
     public ResponseEntity<ApiResponse<Void>> handleFeignStatusException(FeignException ex) {
