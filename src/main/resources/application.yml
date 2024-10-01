@@ -9,9 +9,6 @@ spring:
 
   mvc:
     throw-exception-if-no-handler-found: true  # Para que arroje una excepción si no encuentra un controlador para una ruta.
-  web:
-    resources:
-      add-mappings: false
 
   datasource:
     url: jdbc:mysql://autorack.proxy.rlwy.net:27950/railway  # URL de la base de datos MySQL
