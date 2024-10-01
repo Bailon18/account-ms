@@ -24,19 +24,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AccountDTO'
-              example:
-                - id: 1
-                  numeroCuenta: "1234567890"
-                  saldo: 1500.0
-                  tipoCuenta: AHORROS
-                  clienteId: 101
-                  estado: ACTIVO
-                - id: 2
-                  numeroCuenta: "0987654321"
-                  saldo: 2500.5
-                  tipoCuenta: CORRIENTE
-                  clienteId: 102
-                  estado: INACTIVO
+
     post:
       summary: Crear una nueva cuenta
       requestBody:
@@ -46,28 +34,19 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AccountDTO'
-            example:
-              numeroCuenta: "1234567890"
-              saldo: 1000.0
-              tipoCuenta: AHORROS
-              clienteId: 1
-              estado: ACTIVO
       responses:
         '201':
-          description: Cuenta creada exitosamente
+          description: Cuenta creada exitosamente.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountDTO'
         '400':
-          description: Entrada inválida o número de cuenta duplicado
+          description: Entrada inválida o número de cuenta duplicado.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-              example:
-                code: 400
-                message: "Número de cuenta ya existente."
 
   /accounts/{id}:
     get:
@@ -81,13 +60,13 @@ paths:
           description: ID de la cuenta que se desea recuperar
       responses:
         '200':
-          description: Información de la cuenta
+          description: Información de la cuenta.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountDTO'
         '404':
-          description: Cuenta no encontrada
+          description: Cuenta no encontrada.
           content:
             application/json:
               schema:
@@ -111,19 +90,19 @@ paths:
               $ref: '#/components/schemas/AccountDTO'
       responses:
         '200':
-          description: Cuenta actualizada exitosamente
+          description: Cuenta actualizada exitosamente.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountDTO'
         '400':
-          description: Entrada inválida
+          description: Entrada inválida.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Cuenta no encontrada
+          description: Cuenta no encontrada.
           content:
             application/json:
               schema:
@@ -139,23 +118,23 @@ paths:
             type: integer
           description: ID de la cuenta que se desea eliminar
       responses:
-        '200':
-          description: Cuenta eliminada exitosamente
+        '204':
+          description: Cuenta eliminada exitosamente.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
               example:
-                status: 200
+                status: 204
                 message: "Cuenta eliminada exitosamente."
         '404':
-          description: Cuenta no encontrada
+          description: Cuenta no encontrada.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /accounts/{id}/depositar:
+  /accounts/depositar/{id}:
     put:
       summary: Realizar un depósito en la cuenta
       parameters:
@@ -174,19 +153,56 @@ paths:
           description: Monto a depositar
       responses:
         '200':
-          description: Depósito realizado exitosamente
+          description: Depósito realizado exitosamente.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountDTO'
         '400':
-          description: Monto inválido
+          description: Monto inválido.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Cuenta no encontrada
+          description: Cuenta no encontrada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /accounts/retirar/{id}:
+    put:
+      summary: Realizar un retiro en la cuenta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la cuenta
+        - name: amount
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+          description: Monto a retirar
+      responses:
+        '200':
+          description: Retiro realizado exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDTO'
+        '400':
+          description: Monto inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Cuenta no encontrada.
           content:
             application/json:
               schema:
@@ -249,3 +265,5 @@ components:
         message:
           type: string
           description: Mensaje de éxito
+
+          # actualizado
