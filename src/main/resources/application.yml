@@ -1,0 +1,44 @@
+# Configuración del servidor
+#server:
+#  port: 8081
+
+# Configuración de la aplicación Spring
+spring:
+  application:
+    name: account-ms
+
+  mvc:
+    throw-exception-if-no-handler-found: true  # Para que arroje una excepción si no encuentra un controlador para una ruta.
+
+  datasource:
+    url: jdbc:mysql://autorack.proxy.rlwy.net:27950/railway  # URL de la base de datos MySQL
+    username: root  # Usuario de la base de datos
+    password: IuXoGYEgGVzVsGzPGogVkqEHajOdRReH  # Contraseña de la base de datos
+    driver-class-name: com.mysql.cj.jdbc.Driver  # Clase del driver de MySQL
+
+  jpa:
+    hibernate:
+      ddl-auto: update  # Actualizar las tablas basadas en las entidades
+    show-sql: true  # Mostrar las consultas SQL en la consola
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect  # Dialecto de MySQL para Hibernate
+
+# Configuración de SpringDoc para OpenAPI y Swagger UI
+springdoc:
+  api-docs:
+    path: /v3/api-docs  # Ruta donde se exponen los documentos de la API
+  swagger-ui:
+    path: /swagger-ui.html
+    display-request-duration: true
+    url: /openapi.yaml  # Aquí indicamos que Swagger UI debe utilizar el contrato local
+
+
+# Configuración de Eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: https://euraka-server-production.up.railway.app/eureka  # URL del servidor Eureka para registrar este microservicio
+
+  instance:
+    prefer-ip-address: true  # Prefiere mostrar la IP en lugar del hostname para identificar el servicio

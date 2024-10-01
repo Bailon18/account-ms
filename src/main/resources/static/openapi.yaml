@@ -1,0 +1,249 @@
+openapi: 3.0.1
+info:
+  title: API de Microservicio de Cuentas
+  version: 1.0.0
+  description: API para la gestión de cuentas bancarias y operaciones relacionadas (depósitos y retiros).
+
+servers:
+  - url: http://localhost:8081
+    description: Servidor local para desarrollo de AccountMs
+
+paths:
+  /accounts:
+    get:
+      summary: Recuperar todas las cuentas bancarias
+      description: Devuelve la lista completa de cuentas bancarias registradas en el sistema.
+      responses:
+        '200':
+          description: Lista de todas las cuentas bancarias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountDTO'
+              example:
+                - id: 1
+                  numeroCuenta: "1234567890"
+                  saldo: 1500.0
+                  tipoCuenta: AHORROS
+                  clienteId: 101
+                  estado: ACTIVO
+                - id: 2
+                  numeroCuenta: "0987654321"
+                  saldo: 2500.5
+                  tipoCuenta: CORRIENTE
+                  clienteId: 102
+                  estado: INACTIVO
+    post:
+      summary: Crear una nueva cuenta
+      requestBody:
+        description: Objeto AccountDTO que se debe agregar al sistema
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountDTO'
+            example:
+              numeroCuenta: "1234567890"
+              saldo: 1000.0
+              tipoCuenta: AHORROS
+              clienteId: 1
+              estado: ACTIVO
+      responses:
+        '201':
+          description: Cuenta creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDTO'
+        '400':
+          description: Entrada inválida o número de cuenta duplicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                code: 400
+                message: "Número de cuenta ya existente."
+
+  /accounts/{id}:
+    get:
+      summary: Obtener una cuenta por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la cuenta que se desea recuperar
+      responses:
+        '200':
+          description: Información de la cuenta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDTO'
+        '404':
+          description: Cuenta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Actualizar una cuenta existente por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la cuenta que se desea actualizar
+      requestBody:
+        description: Objeto AccountDTO que se debe actualizar
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountDTO'
+      responses:
+        '200':
+          description: Cuenta actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDTO'
+        '400':
+          description: Entrada inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Cuenta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Eliminar una cuenta por su ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la cuenta que se desea eliminar
+      responses:
+        '200':
+          description: Cuenta eliminada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                status: 200
+                message: "Cuenta eliminada exitosamente."
+        '404':
+          description: Cuenta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /accounts/{id}/depositar:
+    put:
+      summary: Realizar un depósito en la cuenta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la cuenta
+        - name: amount
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+          description: Monto a depositar
+      responses:
+        '200':
+          description: Depósito realizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDTO'
+        '400':
+          description: Monto inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Cuenta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    AccountDTO:
+      type: object
+      required:
+        - numeroCuenta
+        - saldo
+        - tipoCuenta
+        - clienteId
+        - estado
+      properties:
+        id:
+          type: integer
+          description: Identificador único de la cuenta
+        numeroCuenta:
+          type: string
+          description: Número de cuenta único (10 dígitos)
+        saldo:
+          type: number
+          format: double
+          description: Saldo disponible en la cuenta
+        tipoCuenta:
+          type: string
+          enum:
+            - AHORROS
+            - CORRIENTE
+          description: Tipo de cuenta (AHORROS o CORRIENTE)
+        clienteId:
+          type: integer
+          description: ID del cliente propietario de la cuenta
+        estado:
+          type: string
+          enum:
+            - ACTIVO
+            - INACTIVO
+            - CERRADO
+          description: Estado de la cuenta
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Código de error HTTP
+        message:
+          type: string
+          description: Mensaje de error
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          description: Código de estado HTTP
+        message:
+          type: string
+          description: Mensaje de éxito
