@@ -3,7 +3,6 @@ package com.paucar.accountms.dto;
 
 import com.paucar.accountms.util.EstadoCuenta;
 import com.paucar.accountms.util.TipoCuenta;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

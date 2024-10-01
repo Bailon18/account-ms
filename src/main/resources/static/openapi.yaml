@@ -5,8 +5,10 @@ info:
   description: API para la gestión de cuentas bancarias y operaciones relacionadas (depósitos y retiros).
 
 servers:
-  - url: http://localhost:8081
-    description: Servidor local para desarrollo de AccountMs
+  - url: https://account-ms-production.up.railway.app
+    description: Servidor en producción
+  - url: http://localhost:8082
+    description: Servidor local para desarrollo
 
 paths:
   /accounts:
