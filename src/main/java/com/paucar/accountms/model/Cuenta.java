@@ -5,15 +5,17 @@ import com.paucar.accountms.util.TipoCuenta;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Builder
 @Entity
-@Table(name = "accounts")
+@Table(name = "cuentas")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Account {
+public class Cuenta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +23,7 @@ public class Account {
 
     @Column(unique = true, nullable = false)
     @NotNull(message = "El número de cuenta no puede ser nulo.")
-    @Pattern(regexp = "\\d{10}", message = "El número de cuenta debe tener exactamente 10 dígitos.")
+    @Pattern(regexp = "\\d{10,12}", message = "El número de cuenta debe tener entre 10 y 12 dígitos.")
     private String numeroCuenta;
 
     @NotNull(message = "El saldo no puede ser nulo.")
@@ -34,6 +36,7 @@ public class Account {
 
     @NotNull(message = "El ID del cliente es obligatorio.")
     @Positive(message = "El ID del cliente debe ser un número positivo.")
+    @Column(name = "cliente_id")
     private Long clienteId;
 
     @NotNull(message = "El estado de la cuenta es obligatorio.")

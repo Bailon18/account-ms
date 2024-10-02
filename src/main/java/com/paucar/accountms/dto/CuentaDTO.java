@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AccountDTO {
+public class CuentaDTO {
 
     private Long id;
     private String numeroCuenta;

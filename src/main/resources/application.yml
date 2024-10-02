@@ -1,6 +1,6 @@
 # Configuración del servidor
 #server:
-#port: 8081
+#  port: 8081
 
 # Configuración de la aplicación Spring
 spring:
@@ -8,26 +8,26 @@ spring:
     name: ACCOUNT-MS
 
   mvc:
-    throw-exception-if-no-handler-found: true  # Para que arroje una excepción si no encuentra un controlador para una ruta.
+    throw-exception-if-no-handler-found: true
 
   datasource:
-    url: jdbc:mysql://autorack.proxy.rlwy.net:27950/railway  # URL de la base de datos MySQL
-    username: root  # Usuario de la base de datos
-    password: IuXoGYEgGVzVsGzPGogVkqEHajOdRReH  # Contraseña de la base de datos
-    driver-class-name: com.mysql.cj.jdbc.Driver  # Clase del driver de MySQL
+    url: jdbc:mysql://autorack.proxy.rlwy.net:27950/railway
+    username: root
+    password: IuXoGYEgGVzVsGzPGogVkqEHajOdRReH
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update  # Actualizar las tablas basadas en las entidades
-    show-sql: true  # Mostrar las consultas SQL en la consola
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect  # Dialecto de MySQL para Hibernate
+        dialect: org.hibernate.dialect.MySQLDialect
 
 # Configuración de SpringDoc para OpenAPI y Swagger UI
 springdoc:
   api-docs:
-    path: /v3/api-docs  # Ruta donde se exponen los documentos de la API
+    path: /v3/api-docs  # Ruta documentos de la API
   swagger-ui:
     path: /swagger-ui.html
     display-request-duration: true
