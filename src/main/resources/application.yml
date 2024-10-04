@@ -38,7 +38,7 @@ eureka:
   client:
     service-url:
       defaultZone: https://euraka-server-production.up.railway.app/eureka/
-      # Descomentar la siguiente línea para trabajar localmente:
+      #Descomentar la siguiente línea para trabajar localmente:
       #defaultZone: http://localhost:8761/eureka/
 
   instance:
