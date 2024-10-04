@@ -57,29 +57,24 @@ public class CuentaServiceImpl implements CuentaService {
         // Validar la existencia del cliente usando el cliente Feign.
         ResponseEntity<ApiResponse<Cliente>> respuesta = clienteFeign.obtenerCliente(cuentaDTO.getClienteId());
 
-        // Verificar si la respuesta o el cuerpo de la respuesta está vacío.
         if (respuesta.getBody() == null || respuesta.getBody().getDatos() == null) {
             throw new ClienteNoEncontradoException("El cliente con ID: " + cuentaDTO.getClienteId() + " no existe.");
         }
 
-        // Extraer el cliente desde el cuerpo de la respuesta.
         Cliente cliente = respuesta.getBody().getDatos();
 
-        // Validar si la cuenta ya existe con el número proporcionado.
         if (cuentaRepository.existsByNumeroCuenta(cuentaDTO.getNumeroCuenta())) {
             throw new CuentaYaExisteException("La cuenta con número " + cuentaDTO.getNumeroCuenta() + " ya existe.");
         }
 
-        // Convertir DTO a entidad para realizar la operación.
         Cuenta cuenta = cuentaMapper.convertirDtoAEntidad(cuentaDTO);
         cuenta.setEstado(EstadoCuenta.ACTIVO);
 
-        // Generar número de cuenta si no se especificó.
+
         if (cuenta.getNumeroCuenta() == null || cuenta.getNumeroCuenta().isEmpty()) {
             cuenta.setNumeroCuenta(generarNumeroCuenta());
         }
 
-        // Guardar la cuenta y convertirla de nuevo a DTO.
         Cuenta cuentaGuardada = cuentaRepository.save(cuenta);
         return cuentaMapper.convertEntidadADto(cuentaGuardada);
     }

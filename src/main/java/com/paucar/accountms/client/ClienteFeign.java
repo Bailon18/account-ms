@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+// Quitar el parámetro 'url' al manejarse localmente
 @FeignClient(name = "CUSTOMER-MS", url = "https://customer-ms-production.up.railway.app")
 public interface ClienteFeign {
 

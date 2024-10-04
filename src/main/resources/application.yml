@@ -1,4 +1,4 @@
-# Configuración del servidor
+# Descomentar las siguientes líneas para manejarse localmente:
 #server:
 #  port: 8081
 
@@ -27,21 +27,22 @@ spring:
 # Configuración de SpringDoc para OpenAPI y Swagger UI
 springdoc:
   api-docs:
-    path: /v3/api-docs  # Ruta documentos de la API
+    path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
     display-request-duration: true
-    url: /openapi.yaml  # Aquí indicamos que Swagger UI debe utilizar el contrato local
-
+    url: /openapi.yaml
 
 # Configuración de Eureka
 eureka:
   client:
     service-url:
-      defaultZone: https://euraka-server-production.up.railway.app/eureka/  # URL del servidor Eureka para registrar este microservicio
+      defaultZone: https://euraka-server-production.up.railway.app/eureka/
+      # Descomentar la siguiente línea para trabajar localmente:
       #defaultZone: http://localhost:8761/eureka/
-      
+
   instance:
-    prefer-ip-address: true  # Prefiere mostrar la IP en lugar del hostname para identificar el servicio
+    prefer-ip-address: true
     hostname: account-ms-production.up.railway.app
+    # Descomentar la siguiente línea para trabajar localmente:
     #hostname: localhost
