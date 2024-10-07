@@ -76,6 +76,12 @@ public class ExcepcionesGlobales {
         return new ResponseEntity<>(respuestaError, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Void>> manejarExcepcionEstadoIlegal(IllegalStateException ex) {
+        return construirRespuestaError(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> manejarExcepcionViolacionRestriccion(ConstraintViolationException ex) {
         // Extraer los mensajes de las violaciones de restricciones y convertirlos en un Map

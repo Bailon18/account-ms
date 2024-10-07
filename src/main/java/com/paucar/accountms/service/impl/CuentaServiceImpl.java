@@ -16,6 +16,7 @@ import com.paucar.accountms.util.EstadoCuenta;
 import com.paucar.accountms.util.TipoCuenta;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
@@ -79,7 +80,6 @@ public class CuentaServiceImpl implements CuentaService {
         return cuentaMapper.convertEntidadADto(cuentaGuardada);
     }
 
-
     @Override
     public CuentaDTO actualizarCuenta(Long id, CuentaDTO cuentaDTO) {
 
@@ -103,13 +103,13 @@ public class CuentaServiceImpl implements CuentaService {
     }
 
     @Override
-    public CuentaDTO depositar(Long id, Double monto) {
+    public CuentaDTO depositar(String numeroCuenta, Double monto) {
         if (monto <= 0) {
             throw new IllegalArgumentException("El monto a depositar debe ser mayor que 0.");
         }
 
-        Cuenta cuenta = cuentaRepository.findById(id)
-                .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada con el ID: " + id));
+        Cuenta cuenta = cuentaRepository.findByNumeroCuenta(numeroCuenta)
+                .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada con el numero: " + numeroCuenta));
 
         if (cuenta.getEstado() != EstadoCuenta.ACTIVO) {
             throw new IllegalStateException("No se pueden realizar transacciones en cuentas que no estén ACTIVAS.");
@@ -128,13 +128,14 @@ public class CuentaServiceImpl implements CuentaService {
     }
 
     @Override
-    public CuentaDTO retirar(Long id, Double monto) {
+    public CuentaDTO retirar(String numeroCuenta, Double monto) {
+
         if (monto <= 0) {
             throw new IllegalArgumentException("El monto a retirar debe ser mayor que 0.");
         }
 
-        Cuenta cuenta = cuentaRepository.findById(id)
-                .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada con el ID: " + id));
+        Cuenta cuenta = cuentaRepository.findByNumeroCuenta(numeroCuenta)
+                .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada con el numero: " + numeroCuenta));
 
         if (cuenta.getEstado() != EstadoCuenta.ACTIVO) {
             throw new IllegalStateException("No se pueden realizar transacciones en cuentas que no estén ACTIVAS.");
@@ -155,4 +156,38 @@ public class CuentaServiceImpl implements CuentaService {
     private String generarNumeroCuenta() {
         return String.valueOf((long) (Math.random() * 10000000000L));
     }
+
+    @Transactional
+    @Override
+    public Boolean transferir(String numeroCuentaOrigen, String numeroCuentaDestino, Double monto) {
+
+        Cuenta cuentaOrigen = validarCuenta(numeroCuentaOrigen, monto, "origen");
+        Cuenta cuentaDestino = validarCuenta(numeroCuentaDestino, 0.0, "destino");
+
+        this.retirar(cuentaOrigen.getNumeroCuenta(), monto);
+        this.depositar(cuentaDestino.getNumeroCuenta(), monto);
+
+        return true;
+    }
+
+    private Cuenta validarCuenta(String numeroCuenta, Double monto, String tipoCuenta) {
+        Cuenta cuenta = cuentaRepository.findByNumeroCuenta(numeroCuenta)
+                .orElseThrow(() -> new CuentaNoEncontradaException(
+                        "No se pudo realizar la transferencia: la cuenta de " + tipoCuenta +
+                                " con el número [" + numeroCuenta + "] no fue encontrada."));
+
+        if (cuenta.getEstado() != EstadoCuenta.ACTIVO) {
+            throw new IllegalStateException(
+                    "No se pudo realizar la transferencia: la cuenta de " + tipoCuenta +
+                            " con el número [" + numeroCuenta + "] está INACTIVA.");
+        }
+
+        if (tipoCuenta.equals("origen") && cuenta.getTipoCuenta() == TipoCuenta.AHORROS && cuenta.getSaldo() < monto) {
+            throw new SaldoInsuficienteException(
+                    "No se pudo realizar la transferencia: saldo insuficiente en la cuenta de origen [" + numeroCuenta + "].");
+        }
+
+        return cuenta;
+    }
+
 }
