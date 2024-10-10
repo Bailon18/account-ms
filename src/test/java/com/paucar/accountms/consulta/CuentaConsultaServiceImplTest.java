@@ -106,7 +106,6 @@ class CuentaConsultaServiceImplTest {
     void obtenerCuentaPorId_DeberiaRetornarCuenta() {
         log.info("Iniciando prueba: obtenerCuentaPorId_DeberiaRetornarCuenta");
 
-        // Definir la cuenta simulada usando el patrón Builder.
         Cuenta cuenta = Cuenta.builder()
                 .id(1L)
                 .numeroCuenta("1234567890")
@@ -117,8 +116,6 @@ class CuentaConsultaServiceImplTest {
                 .build();
 
         when(cuentaRepository.findById(1L)).thenReturn(Optional.of(cuenta));
-
-        // Definir el DTO correspondiente usando el patrón Builder.
         CuentaDTO cuentaDTO = CuentaDTO.builder()
                 .id(1L)
                 .numeroCuenta("1234567890")
@@ -130,7 +127,6 @@ class CuentaConsultaServiceImplTest {
 
         when(cuentaMapper.convertEntidadADto(cuenta)).thenReturn(cuentaDTO);
 
-        // Llamar al método del servicio.
         Optional<CuentaDTO> resultado = cuentaConsultaService.obtenerCuentaPorId(1L);
 
         log.info("Resultado de búsqueda de cuenta por ID: {}", resultado);
@@ -143,7 +139,6 @@ class CuentaConsultaServiceImplTest {
     void obtenerCuentasPorClienteId_DeberiaRetornarListaDeCuentas() {
         log.info("Iniciando prueba: obtenerCuentasPorClienteId_DeberiaRetornarListaDeCuentas");
 
-        // Definir cuentas simuladas usando el patrón Builder.
         List<Cuenta> cuentas = Arrays.asList(
                 Cuenta.builder()
                         .id(1L)
@@ -165,7 +160,6 @@ class CuentaConsultaServiceImplTest {
 
         when(cuentaRepository.findByClienteId(1L)).thenReturn(cuentas);
 
-        // Definir los DTOs correspondientes usando el patrón Builder.
         when(cuentaMapper.convertEntidadADto(cuentas.get(0)))
                 .thenReturn(CuentaDTO.builder()
                         .id(1L)
@@ -185,12 +179,10 @@ class CuentaConsultaServiceImplTest {
                         .estado(EstadoCuenta.ACTIVO)
                         .build());
 
-        // Llamar al método a probar.
         List<CuentaDTO> resultado = cuentaConsultaService.obtenerCuentasPorClienteId(1L);
 
         log.info("Resultado de búsqueda de cuentas por cliente ID: {}", resultado);
 
-        // Validar que el tamaño de la lista devuelta es el esperado.
         assertEquals(2, resultado.size(), "El tamaño de la lista debería ser 2.");
     }
 }

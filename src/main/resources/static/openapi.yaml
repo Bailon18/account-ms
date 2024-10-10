@@ -7,10 +7,10 @@ info:
     Permite realizar transacciones como depósitos, retiros y transferencias entre cuentas.
 
 servers:
-  - url: http://localhost:8081
-    description: Servidor local
   - url: https://account-ms-production.up.railway.app
     description: Servidor de producción
+  - url: http://localhost:8081
+    description: Servidor local
 
 tags:
   - name: Cuentas

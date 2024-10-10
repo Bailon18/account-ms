@@ -125,28 +125,34 @@ public class CuentaController {
         return new ResponseEntity<>(respuesta, HttpStatus.OK);
     }
 
+
     @PutMapping("/realizar-transferencia")
     public ResponseEntity<ApiResponse<Boolean>> transferencia(@RequestParam String cuentaOrigen,
                                                               @RequestParam String cuentaDestino,
-                                                              @RequestParam Double monto){
+                                                              @RequestParam Double monto) {
 
         boolean estadoTransferencia = cuentaTransaccionService.transferir(cuentaOrigen, cuentaDestino, monto);
 
         ApiResponse<Boolean> respuesta;
+        HttpStatus status;
+
         if (estadoTransferencia) {
             respuesta = ApiResponse.<Boolean>builder()
                     .estado(HttpStatus.OK.value())
                     .mensaje("Transferencia realizada con éxito")
                     .datos(true)
                     .build();
+            status = HttpStatus.OK;
         } else {
             respuesta = ApiResponse.<Boolean>builder()
                     .estado(HttpStatus.BAD_REQUEST.value())
                     .mensaje("No se pudo realizar la transferencia")
                     .datos(false)
                     .build();
+            status = HttpStatus.BAD_REQUEST;
         }
 
-        return new ResponseEntity<>(respuesta, HttpStatus.OK);
+        return new ResponseEntity<>(respuesta, status); // Usamos `status` en lugar de `HttpStatus.OK`
     }
+
 }
