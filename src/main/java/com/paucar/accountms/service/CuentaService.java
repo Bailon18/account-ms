@@ -12,15 +12,8 @@ public interface CuentaService {
     CuentaDTO crearCuenta(CuentaDTO cuentaDTO);
     CuentaDTO actualizarCuenta(Long id, CuentaDTO cuentaDTO);
     void eliminarCuenta(Long id);
-
-
-    //CuentaDTO depositar(Long id, Double monto);
     CuentaDTO depositar(String numeroCuenta, Double monto);
-
     CuentaDTO retirar(String numeroCuenta, Double monto);
-    //CuentaDTO retirar(Long id, Double monto);
     List<CuentaDTO> obtenerCuentasPorClienteId(Long clienteId);
-
-
     Boolean transferir(String numeroCuentaOrigen, String numeroCuentaDestino, Double monto);
 }

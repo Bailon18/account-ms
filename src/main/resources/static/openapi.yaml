@@ -2,17 +2,29 @@ openapi: 3.0.1
 info:
   title: API de Microservicio de Cuentas
   version: 1.0.0
-  description: Microservicio para la gestión de cuentas bancarias y operaciones.
+  description: |
+    Microservicio para la gestión de cuentas bancarias y operaciones relacionadas.
+    Permite realizar transacciones como depósitos, retiros y transferencias entre cuentas.
 
 servers:
+  - url: http://localhost:8081
+    description: Servidor local
   - url: https://account-ms-production.up.railway.app
     description: Servidor de producción
+
+tags:
+  - name: Cuentas
+    description: Gestión de cuentas bancarias
+  - name: Transacciones
+    description: Operaciones de transacciones en cuentas (depósitos, retiros, transferencias)
 
 paths:
   /cuentas:
     get:
       summary: Obtener todas las cuentas
       description: Devuelve la lista completa de cuentas bancarias.
+      tags:
+        - Cuentas
       responses:
         '200':
           description: Lista de cuentas
@@ -22,16 +34,31 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Cuenta'
+              example:
+                - id: 1
+                  numeroCuenta: "1234567890"
+                  saldo: 1500.50
+                  tipoCuenta: "AHORROS"
+                  clienteId: 1001
+                  estado: "ACTIVO"
 
     post:
       summary: Crear nueva cuenta
       description: Crea una nueva cuenta bancaria.
+      tags:
+        - Cuentas
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Cuenta'
+            example:
+              numeroCuenta: "9876543210"
+              saldo: 500.00
+              tipoCuenta: "CORRIENTE"
+              clienteId: 1002
+              estado: "ACTIVO"
       responses:
         '201':
           description: Cuenta creada exitosamente.
@@ -44,6 +71,8 @@ paths:
     get:
       summary: Obtener cuenta por ID
       description: Devuelve los detalles de una cuenta específica por ID.
+      tags:
+        - Cuentas
       parameters:
         - name: id
           in: path
@@ -58,12 +87,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Cuenta'
+              example:
+                id: 2
+                numeroCuenta: "2233445566"
+                saldo: 1200.75
+                tipoCuenta: "CORRIENTE"
+                clienteId: 1003
+                estado: "INACTIVO"
         '404':
           description: Cuenta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
     put:
       summary: Actualizar cuenta
       description: Actualiza los detalles de una cuenta específica por ID.
+      tags:
+        - Cuentas
       parameters:
         - name: id
           in: path
@@ -77,19 +119,20 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/Cuenta'
+            example:
+              saldo: 2000.00
+              estado: "ACTIVO"
       responses:
         '200':
           description: Cuenta actualizada exitosamente
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Cuenta'
         '404':
           description: Cuenta no encontrada
 
     delete:
       summary: Eliminar cuenta
       description: Elimina una cuenta específica por ID.
+      tags:
+        - Cuentas
       parameters:
         - name: id
           in: path
@@ -107,6 +150,8 @@ paths:
     get:
       summary: Obtener cuentas por cliente
       description: Devuelve la lista de cuentas asociadas a un cliente específico.
+      tags:
+        - Cuentas
       parameters:
         - name: clienteId
           in: path
@@ -123,6 +168,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Cuenta'
+              example:
+                - id: 4
+                  numeroCuenta: "6677889900"
+                  saldo: 300.25
+                  tipoCuenta: "AHORROS"
+                  clienteId: 1004
+                  estado: "CERRADO"
         '404':
           description: Cliente no encontrado
 
@@ -130,6 +182,8 @@ paths:
     put:
       summary: Realizar depósito
       description: Realiza un depósito en la cuenta especificada.
+      tags:
+        - Transacciones
       parameters:
         - name: numeroCuenta
           in: query
@@ -150,8 +204,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Cuenta'
-        '400':
-          description: Monto inválido
         '404':
           description: Cuenta no encontrada
 
@@ -159,6 +211,8 @@ paths:
     put:
       summary: Realizar retiro
       description: Realiza un retiro en la cuenta especificada.
+      tags:
+        - Transacciones
       parameters:
         - name: numeroCuenta
           in: query
@@ -175,12 +229,6 @@ paths:
       responses:
         '200':
           description: Retiro exitoso
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Cuenta'
-        '400':
-          description: Monto inválido
         '404':
           description: Cuenta no encontrada
 
@@ -188,6 +236,8 @@ paths:
     put:
       summary: Realizar transferencia entre cuentas
       description: Realiza una transferencia entre dos cuentas especificadas.
+      tags:
+        - Transacciones
       parameters:
         - name: cuentaOrigen
           in: query
@@ -210,11 +260,8 @@ paths:
       responses:
         '200':
           description: Transferencia realizada con éxito
-        '400':
-          description: Datos incorrectos o monto inválido
         '404':
           description: Cuenta no encontrada
-
 
 components:
   schemas:
@@ -244,7 +291,7 @@ components:
             - ACTIVO
             - INACTIVO
             - CERRADO
-          description: Estado actual de la cuenta (ACTIVO, INACTIVO, CERRADO)
+          description: Estado actual de la cuenta
 
     ErrorResponse:
       type: object

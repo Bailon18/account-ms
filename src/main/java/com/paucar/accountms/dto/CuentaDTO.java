@@ -3,11 +3,14 @@ package com.paucar.accountms.dto;
 
 import com.paucar.accountms.util.EstadoCuenta;
 import com.paucar.accountms.util.TipoCuenta;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+@Builder
 @Getter
 @Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CuentaDTO {
 
     private Long id;

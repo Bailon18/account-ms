@@ -11,7 +11,7 @@ spring:
     throw-exception-if-no-handler-found: true
 
   datasource:
-    url: jdbc:mysql://autorack.proxy.rlwy.net:27950/railway
+    url: ${URL_ACCOUNT}
     username: root
     password: ${PASSWORD_ACCOUNT}
     #url: jdbc:mysql://localhost:3306/account_db

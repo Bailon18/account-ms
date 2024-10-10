@@ -1,4 +1,4 @@
-package com.paucar.accountms.model;
+package com.paucar.accountms.client.dto;
 
 
 import lombok.AllArgsConstructor;

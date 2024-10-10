@@ -1,30 +1,35 @@
 package com.paucar.accountms.controller;
 
 import com.paucar.accountms.dto.CuentaDTO;
-import com.paucar.accountms.service.CuentaService;
 import com.paucar.accountms.util.ApiResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.paucar.accountms.service.consulta.CuentaConsultaService;
+import com.paucar.accountms.service.gestion.CuentaGestionService;
+import com.paucar.accountms.service.transaccion.CuentaTransaccionService;
+
 
 import java.util.List;
 import java.util.Optional;
 
+
 @RestController
 @RequestMapping("/cuentas")
 @CrossOrigin(originPatterns = "*", allowCredentials = "true")
+@RequiredArgsConstructor
 public class CuentaController {
 
-    private final CuentaService cuentaService;
+    private final CuentaConsultaService cuentaConsultaService;
+    private final CuentaGestionService cuentaGestionService;
+    private final CuentaTransaccionService cuentaTransaccionService;
 
-    public CuentaController(CuentaService cuentaService) {
-        this.cuentaService = cuentaService;
-    }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<CuentaDTO>>> obtenerTodasLasCuentas() {
-        List<CuentaDTO> cuentas = cuentaService.obtenerTodasLasCuentas();
+        List<CuentaDTO> cuentas = cuentaConsultaService.obtenerTodasLasCuentas();
         ApiResponse<List<CuentaDTO>> respuesta = ApiResponse.<List<CuentaDTO>>builder()
                 .estado(HttpStatus.OK.value())
                 .mensaje("Lista de cuentas recuperada exitosamente")
@@ -35,7 +40,7 @@ public class CuentaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CuentaDTO>> obtenerCuentaPorId(@PathVariable Long id) {
-        Optional<CuentaDTO> cuenta = cuentaService.obtenerCuentaPorId(id);
+        Optional<CuentaDTO> cuenta = cuentaConsultaService.obtenerCuentaPorId(id);
         return cuenta.map(valor -> {
             ApiResponse<CuentaDTO> respuesta = ApiResponse.<CuentaDTO>builder()
                     .estado(HttpStatus.OK.value())
@@ -54,7 +59,7 @@ public class CuentaController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<CuentaDTO>> crearCuenta(@Valid @RequestBody CuentaDTO cuentaDTO) {
-        CuentaDTO nuevaCuenta = cuentaService.crearCuenta(cuentaDTO);
+        CuentaDTO nuevaCuenta = cuentaGestionService.crearCuenta(cuentaDTO);
         ApiResponse<CuentaDTO> respuesta = ApiResponse.<CuentaDTO>builder()
                 .estado(HttpStatus.CREATED.value())
                 .mensaje("Cuenta creada exitosamente")
@@ -66,7 +71,7 @@ public class CuentaController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<CuentaDTO>> actualizarCuenta(@PathVariable Long id,
                                                                    @Valid @RequestBody CuentaDTO cuentaDTO) {
-        CuentaDTO cuentaActualizada = cuentaService.actualizarCuenta(id, cuentaDTO);
+        CuentaDTO cuentaActualizada = cuentaGestionService.actualizarCuenta(id, cuentaDTO);
         ApiResponse<CuentaDTO> respuesta = ApiResponse.<CuentaDTO>builder()
                 .estado(HttpStatus.OK.value())
                 .mensaje("Cuenta actualizada exitosamente")
@@ -77,7 +82,7 @@ public class CuentaController {
 
     @GetMapping("/cliente/{clienteId}")
     public ResponseEntity<ApiResponse<List<CuentaDTO>>> obtenerCuentasPorClienteId(@PathVariable Long clienteId) {
-        List<CuentaDTO> cuentas = cuentaService.obtenerCuentasPorClienteId(clienteId);
+        List<CuentaDTO> cuentas = cuentaConsultaService.obtenerCuentasPorClienteId(clienteId);
         ApiResponse<List<CuentaDTO>> respuesta = ApiResponse.<List<CuentaDTO>>builder()
                 .estado(HttpStatus.OK.value())
                 .mensaje("Lista de cuentas del cliente recuperada exitosamente")
@@ -88,7 +93,7 @@ public class CuentaController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> eliminarCuenta(@PathVariable Long id) {
-        cuentaService.eliminarCuenta(id);
+        cuentaGestionService.eliminarCuenta(id);
         ApiResponse<Void> respuesta = ApiResponse.<Void>builder()
                 .estado(HttpStatus.NO_CONTENT.value())
                 .mensaje("Cuenta eliminada exitosamente")
@@ -99,7 +104,7 @@ public class CuentaController {
     @PutMapping("/depositar")
     public ResponseEntity<ApiResponse<CuentaDTO>> depositar(@RequestParam String numeroCuenta,
                                                             @RequestParam Double monto) {
-        CuentaDTO cuentaActualizada = cuentaService.depositar(numeroCuenta, monto);
+        CuentaDTO cuentaActualizada = cuentaTransaccionService.depositar(numeroCuenta, monto);
         ApiResponse<CuentaDTO> respuesta = ApiResponse.<CuentaDTO>builder()
                 .estado(HttpStatus.OK.value())
                 .mensaje("Depósito realizado con éxito")
@@ -111,7 +116,7 @@ public class CuentaController {
     @PutMapping("/retirar")
     public ResponseEntity<ApiResponse<CuentaDTO>> retirar(@RequestParam String numeroCuenta,
                                                           @RequestParam Double monto) {
-        CuentaDTO cuentaActualizada = cuentaService.retirar(numeroCuenta, monto);
+        CuentaDTO cuentaActualizada = cuentaTransaccionService.retirar(numeroCuenta, monto);
         ApiResponse<CuentaDTO> respuesta = ApiResponse.<CuentaDTO>builder()
                 .estado(HttpStatus.OK.value())
                 .mensaje("Retiro realizado con éxito")
@@ -125,7 +130,7 @@ public class CuentaController {
                                                               @RequestParam String cuentaDestino,
                                                               @RequestParam Double monto){
 
-        boolean estadoTransferencia = cuentaService.transferir(cuentaOrigen, cuentaDestino, monto);
+        boolean estadoTransferencia = cuentaTransaccionService.transferir(cuentaOrigen, cuentaDestino, monto);
 
         ApiResponse<Boolean> respuesta;
         if (estadoTransferencia) {
@@ -144,5 +149,4 @@ public class CuentaController {
 
         return new ResponseEntity<>(respuesta, HttpStatus.OK);
     }
-
 }

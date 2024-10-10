@@ -8,7 +8,7 @@ import com.paucar.accountms.exception.ClienteNoEncontradoException;
 import com.paucar.accountms.exception.SaldoInsuficienteException;
 import com.paucar.accountms.mapper.CuentaMapper;
 import com.paucar.accountms.model.Cuenta;
-import com.paucar.accountms.model.Cliente;
+import com.paucar.accountms.client.dto.Cliente;
 import com.paucar.accountms.repository.CuentaRepository;
 import com.paucar.accountms.service.CuentaService;
 import com.paucar.accountms.util.ApiResponse;
@@ -38,6 +38,8 @@ public class CuentaServiceImpl implements CuentaService {
         this.cuentaMapper = cuentaMapper;
     }
 
+
+    // servicio consulta
     @Override
     public List<CuentaDTO> obtenerTodasLasCuentas() {
         return cuentaRepository.findAll().stream()
@@ -52,6 +54,74 @@ public class CuentaServiceImpl implements CuentaService {
                 .map(cuentaMapper::convertEntidadADto);
     }
 
+    @Override
+    public List<CuentaDTO> obtenerCuentasPorClienteId(Long clienteId) {
+        return cuentaRepository.findByClienteId(clienteId).stream()
+                .map(cuentaMapper::convertEntidadADto)
+                .collect(Collectors.toList());
+    }
+
+
+    // servicio de transaccion
+    @Override
+    public CuentaDTO depositar(String numeroCuenta, Double monto) {
+        if (monto <= 0) {
+            throw new IllegalArgumentException("El monto a depositar debe ser mayor que 0.");
+        }
+
+        Cuenta cuenta = cuentaRepository.findByNumeroCuenta(numeroCuenta)
+                .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada con el numero: " + numeroCuenta));
+
+        if (cuenta.getEstado() != EstadoCuenta.ACTIVO) {
+            throw new IllegalStateException("No se pueden realizar transacciones en cuentas que no estén ACTIVAS.");
+        }
+
+        cuenta.setSaldo(cuenta.getSaldo() + monto);
+        Cuenta cuentaGuardada = cuentaRepository.save(cuenta);
+        return cuentaMapper.convertEntidadADto(cuentaGuardada);
+    }
+
+    @Override
+    public CuentaDTO retirar(String numeroCuenta, Double monto) {
+
+        if (monto <= 0) {
+            throw new IllegalArgumentException("El monto a retirar debe ser mayor que 0.");
+        }
+
+        Cuenta cuenta = cuentaRepository.findByNumeroCuenta(numeroCuenta)
+                .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada con el numero: " + numeroCuenta));
+
+        if (cuenta.getEstado() != EstadoCuenta.ACTIVO) {
+            throw new IllegalStateException("No se pueden realizar transacciones en cuentas que no estén ACTIVAS.");
+        }
+
+        if (cuenta.getTipoCuenta() == TipoCuenta.AHORROS && cuenta.getSaldo() < monto) {
+            throw new SaldoInsuficienteException("Saldo insuficiente en la cuenta de ahorros.");
+        }
+        if (cuenta.getTipoCuenta() == TipoCuenta.CORRIENTE && cuenta.getSaldo() - monto < -500) {
+            throw new SaldoInsuficienteException("Límite de sobregiro alcanzado en la cuenta corriente.");
+        }
+
+        cuenta.setSaldo(cuenta.getSaldo() - monto);
+        Cuenta cuentaGuardada = cuentaRepository.save(cuenta);
+        return cuentaMapper.convertEntidadADto(cuentaGuardada);
+    }
+
+    @Transactional
+    @Override
+    public Boolean transferir(String numeroCuentaOrigen, String numeroCuentaDestino, Double monto) {
+
+        Cuenta cuentaOrigen = validarCuenta(numeroCuentaOrigen, monto, "origen");
+        Cuenta cuentaDestino = validarCuenta(numeroCuentaDestino, 0.0, "destino");
+
+        this.retirar(cuentaOrigen.getNumeroCuenta(), monto);
+        this.depositar(cuentaDestino.getNumeroCuenta(), monto);
+
+        return true;
+    }
+
+
+    // esto aun no tiene su propio servicio !
     @Override
     public CuentaDTO crearCuenta(CuentaDTO cuentaDTO) {
 
@@ -102,72 +172,9 @@ public class CuentaServiceImpl implements CuentaService {
         cuentaRepository.deleteById(id);
     }
 
-    @Override
-    public CuentaDTO depositar(String numeroCuenta, Double monto) {
-        if (monto <= 0) {
-            throw new IllegalArgumentException("El monto a depositar debe ser mayor que 0.");
-        }
-
-        Cuenta cuenta = cuentaRepository.findByNumeroCuenta(numeroCuenta)
-                .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada con el numero: " + numeroCuenta));
-
-        if (cuenta.getEstado() != EstadoCuenta.ACTIVO) {
-            throw new IllegalStateException("No se pueden realizar transacciones en cuentas que no estén ACTIVAS.");
-        }
-
-        cuenta.setSaldo(cuenta.getSaldo() + monto);
-        Cuenta cuentaGuardada = cuentaRepository.save(cuenta);
-        return cuentaMapper.convertEntidadADto(cuentaGuardada);
-    }
-
-    @Override
-    public List<CuentaDTO> obtenerCuentasPorClienteId(Long clienteId) {
-        return cuentaRepository.findByClienteId(clienteId).stream()
-                .map(cuentaMapper::convertEntidadADto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public CuentaDTO retirar(String numeroCuenta, Double monto) {
-
-        if (monto <= 0) {
-            throw new IllegalArgumentException("El monto a retirar debe ser mayor que 0.");
-        }
-
-        Cuenta cuenta = cuentaRepository.findByNumeroCuenta(numeroCuenta)
-                .orElseThrow(() -> new CuentaNoEncontradaException("Cuenta no encontrada con el numero: " + numeroCuenta));
-
-        if (cuenta.getEstado() != EstadoCuenta.ACTIVO) {
-            throw new IllegalStateException("No se pueden realizar transacciones en cuentas que no estén ACTIVAS.");
-        }
-
-        if (cuenta.getTipoCuenta() == TipoCuenta.AHORROS && cuenta.getSaldo() < monto) {
-            throw new SaldoInsuficienteException("Saldo insuficiente en la cuenta de ahorros.");
-        }
-        if (cuenta.getTipoCuenta() == TipoCuenta.CORRIENTE && cuenta.getSaldo() - monto < -500) {
-            throw new SaldoInsuficienteException("Límite de sobregiro alcanzado en la cuenta corriente.");
-        }
-
-        cuenta.setSaldo(cuenta.getSaldo() - monto);
-        Cuenta cuentaGuardada = cuentaRepository.save(cuenta);
-        return cuentaMapper.convertEntidadADto(cuentaGuardada);
-    }
 
     private String generarNumeroCuenta() {
         return String.valueOf((long) (Math.random() * 10000000000L));
-    }
-
-    @Transactional
-    @Override
-    public Boolean transferir(String numeroCuentaOrigen, String numeroCuentaDestino, Double monto) {
-
-        Cuenta cuentaOrigen = validarCuenta(numeroCuentaOrigen, monto, "origen");
-        Cuenta cuentaDestino = validarCuenta(numeroCuentaDestino, 0.0, "destino");
-
-        this.retirar(cuentaOrigen.getNumeroCuenta(), monto);
-        this.depositar(cuentaDestino.getNumeroCuenta(), monto);
-
-        return true;
     }
 
     private Cuenta validarCuenta(String numeroCuenta, Double monto, String tipoCuenta) {
